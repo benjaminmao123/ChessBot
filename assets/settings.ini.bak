@@ -1,0 +1,20 @@
+[Engine]
+Contempt = 0
+Min Split Depth = 0
+Threads = 2
+Ponder = true
+Hash = 2048
+MultiPV = 1
+Skill Level = 20
+Move Overhead = 10
+Minimum Thinking Time = 50
+Slow Mover = 10
+UCI_Chess960 = false
+UCI_LimitStrength = false
+UCI_Elo = 1350
+depth = 1
+best_move_time_limit = 50
+
+[Misc]
+debug = false
+autoplay = false

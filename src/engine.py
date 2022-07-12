@@ -16,12 +16,16 @@ class Engine:
             else:
                 params[option] = config.getint('Engine', option)
 
-        self.__engine = Stockfish(path='assets/stockfish_15_x64_avx2.exe',
+        self.__config = config
+        self.__engine = Stockfish(path=config['Path']['stockfish'],
                                   depth=config.getint('Engine', 'depth'),
                                   parameters=params)
 
-    def update_engine(self, fen):
+    def update_fen(self, fen):
         self.__engine.set_fen_position(fen)
 
-    def get_best_move(self, time=500):
+    def get_best_move(self, time=0):
+        if time == 0:
+            return self.__engine.get_best_move()
+
         return self.__engine.get_best_move_time(time)

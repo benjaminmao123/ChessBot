@@ -29,3 +29,6 @@ class Engine:
             return self.__engine.get_best_move()
 
         return self.__engine.get_best_move_time(time)
+
+    def get_evaluation(self):
+        return self.__engine.get_evaluation()

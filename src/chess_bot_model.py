@@ -24,8 +24,9 @@ class ChessBotModel:
 
         h_elements = self.__driver.find_elements(By.CSS_SELECTOR, strings.highlighted_elements)
 
-        src_square_num = Parser.letters_to_numbers[self.__next_move['squares'][0][-2:-1]] + \
-                         self.__next_move['squares'][0][-1]
+        src_square_name = self.__next_move['square_name'][0]
+
+        src_square_num = Parser.letters_to_numbers[src_square_name[-2:-1]] + src_square_name[-1]
 
         if h_elements:
             for e in h_elements:
@@ -34,8 +35,8 @@ class ChessBotModel:
                         return
 
         ac = ActionChains(self.__driver)
-        utils.right_click_on_square(ac, self.__board.get_board_element(), self.__next_move['element'][0])
-        utils.right_click_on_square(ac, self.__board.get_board_element(), self.__next_move['element'][1])
+        utils.right_click_on_square(ac, self.__board.get_board_element(), self.__next_move['square'][0])
+        utils.right_click_on_square(ac, self.__board.get_board_element(), self.__next_move['square'][1])
         ac.perform()
 
     def play_next_move(self):
@@ -82,7 +83,8 @@ class ChessBotModel:
             src_square, dest_square = self.__board.get_board_map_element(src_square_name), \
                                       self.__board.get_board_map_element(dest_square_name)
 
-            self.__next_move = {'square': (src_square, dest_square),
+            self.__next_move = {'square_name': (src_square_name, dest_square_name),
+                                'square': (src_square, dest_square),
                                 'promotion': res['promotion']}
 
         return self.__next_move

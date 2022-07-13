@@ -24,19 +24,11 @@ class ChessBot:
         self.__chess_bot_model = ChessBotModel(self.__driver, self.__config, self.__board, self.__engine, self)
         self.__is_playing = False
 
-    def __init_driver(self):
-        self.__options = Options()
-        self.__options.binary_location = self.__config.get('Path', 'chrome_binary')
-        self.__options.add_experimental_option("excludeSwitches", ['enable-automation'])
-
-        self.__driver = webdriver.Chrome(executable_path=self.__config.get('Path', 'web_driver'),
-                                         options=self.__options)
-        self.__driver.maximize_window()
-        self.__driver.get(self.__config.get('Path', 'url'))
-
     def run(self):
         board_initialized = False
         quit_app = False
+
+        self.__display_menu()
 
         while not quit_app:
             try:
@@ -46,6 +38,64 @@ class ChessBot:
                 pass
 
         self.__driver.quit()
+
+    def update_state(self):
+        func_name = inspect.currentframe().f_code.co_name
+
+        if not self.__is_playing:
+            if self.__driver.find_elements(By.CSS_SELECTOR, strings.resign_button):
+                self.__is_playing = True
+
+            if self.__driver.current_url:
+                if 'analysis' in self.__driver.current_url:
+                    if not self.__board.board_in_checkmate():
+                        self.__is_playing = True
+
+            if self.__is_playing:
+                self.__display_menu()
+                utils.log(self.__config.getboolean('Misc', 'debug'),
+                          f'Is Playing: {self.__is_playing}', func_name)
+        else:
+            if self.__driver.find_elements(By.CSS_SELECTOR, strings.game_over) or \
+                    self.__driver.find_elements(By.XPATH, strings.game_over_text) or \
+                    self.__driver.find_elements(By.CSS_SELECTOR, strings.game_result):
+                self.__is_playing = False
+
+            if self.__driver.current_url:
+                if ('analysis' not in self.__driver.current_url and
+                        'game' not in self.__driver.current_url and
+                        'computer' not in self.__driver.current_url):
+                    self.__is_playing = False
+
+                if 'analysis' in self.__driver.current_url:
+                    if self.__board.board_in_checkmate():
+                        self.__is_playing = False
+
+            if not self.__is_playing:
+                self.__display_menu()
+                utils.log(self.__config.getboolean('Misc', 'debug'),
+                          f'Is Playing: {self.__is_playing}', func_name)
+
+    def display_evaluation(self):
+        eval_type = self.__engine.get_evaluation()['type']
+        value = self.__engine.get_evaluation()['value']
+
+        if eval_type == 'cp':
+            value = value / 100
+
+        utils.clear_console()
+
+        print(f'Evaluation - {eval_type}: {value}')
+
+    def __init_driver(self):
+        self.__options = Options()
+        self.__options.binary_location = self.__config.get('Path', 'chrome_binary')
+        self.__options.add_experimental_option("excludeSwitches", ['enable-automation'])
+
+        self.__driver = webdriver.Chrome(executable_path=self.__config.get('Path', 'web_driver'),
+                                         options=self.__options)
+        self.__driver.maximize_window()
+        self.__driver.get(self.__config.get('Path', 'url'))
 
     def __update(self, board_initialized):
         self.update_state()
@@ -74,30 +124,12 @@ class ChessBot:
 
         return board_initialized, quit_app
 
-    def update_state(self):
-        func_name = inspect.currentframe().f_code.co_name
+    def __display_menu(self):
+        title = 'Hotkeys\n'
 
-        if not self.__is_playing:
-            if self.__driver.find_elements(By.CSS_SELECTOR, strings.resign_button):
-                self.__is_playing = True
-            if 'analysis' in self.__driver.current_url:
-                if not self.__board.board_in_checkmate():
-                    self.__is_playing = True
+        utils.clear_console()
 
-            if self.__is_playing:
-                utils.log(self.__config.getboolean('Misc', 'debug'),
-                          f'Is Playing: {self.__is_playing}', func_name)
-        else:
-            if self.__driver.find_elements(By.CSS_SELECTOR, strings.game_over) or \
-                    self.__driver.find_elements(By.XPATH, strings.game_over_text) or \
-                    ('analysis' not in self.__driver.current_url and
-                     'game' not in self.__driver.current_url and
-                     'computer' not in self.__driver.current_url) or \
-                    self.__driver.find_elements(By.CSS_SELECTOR, strings.game_result):
-                self.__is_playing = False
-            if 'analysis' in self.__driver.current_url:
-                if self.__board.board_in_checkmate():
-                    self.__is_playing = False
-            if not self.__is_playing:
-                utils.log(self.__config.getboolean('Misc', 'debug'),
-                          f'Is Playing: {self.__is_playing}', func_name)
+        print(title)
+
+        for k, v in self.__config['Keybinds'].items():
+            print(f'{k}: {v}')

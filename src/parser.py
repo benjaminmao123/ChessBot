@@ -80,9 +80,9 @@ class Parser:
 
         if len(san) == 3:
             if board.is_flipped():
-                piece_name = Parser.fen_to_name_black_promo[san[0]]
+                piece_name = Parser.fen_to_name_black_promo[san[-1]]
             else:
-                piece_name = Parser.fen_to_name_white[san[0]]
+                piece_name = Parser.fen_to_name_white[san[-1]]
 
             src_square = None
             dest_square = san[-2:]

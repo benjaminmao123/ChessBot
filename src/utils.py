@@ -19,14 +19,14 @@ def click_on_element(ac, element):
     ac.click()
 
 
-def click_on_square(ac, board_element, src_square):
+def click_on_square(ac, board_element, square):
     square_size = board_element.size['height'] / 8
 
     board_location_x = -board_element.location['x'] - square_size
     board_location_y = -square_size * 4
 
-    distance_x = src_square['x'] - board_element.location['x']
-    distance_y = src_square['y'] - board_element.location['y']
+    distance_x = square['x'] - board_element.location['x']
+    distance_y = square['y'] - board_element.location['y']
 
     x = board_location_x + distance_x
     y = board_location_y + distance_y
@@ -35,14 +35,14 @@ def click_on_square(ac, board_element, src_square):
     ac.click()
 
 
-def right_click_on_square(ac, board_element, src_square):
+def right_click_on_square(ac, board_element, square):
     square_size = board_element.size['height'] / 8
 
     board_location_x = -board_element.location['x'] - square_size
     board_location_y = -square_size * 4
 
-    distance_x = src_square['x'] - board_element.location['x']
-    distance_y = src_square['y'] - board_element.location['y']
+    distance_x = square['x'] - board_element.location['x']
+    distance_y = square['y'] - board_element.location['y']
 
     x = board_location_x + distance_x
     y = board_location_y + distance_y

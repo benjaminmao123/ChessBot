@@ -101,7 +101,7 @@ class Board:
         self.__turn = not self.__turn
 
         self.__chess_bot.update_state()
-        self.__chess_bot.display_evaluation()
+        self.__chess_bot.self.update_gui()
 
     def generate_fen(self):
         return self.__board.fen()

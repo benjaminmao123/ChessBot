@@ -52,7 +52,7 @@ class ChessBot:
                         self.__is_playing = True
 
             if self.__is_playing:
-                self.__display_menu()
+                self.__update_gui()
                 utils.log(self.__config.getboolean('Misc', 'debug'),
                           f'Is Playing: {self.__is_playing}', func_name)
         else:
@@ -72,28 +72,37 @@ class ChessBot:
                         self.__is_playing = False
 
             if not self.__is_playing:
-                self.__display_menu()
+                self.__update_gui()
                 utils.log(self.__config.getboolean('Misc', 'debug'),
                           f'Is Playing: {self.__is_playing}', func_name)
 
-    def display_evaluation(self):
+    def update_gui(self):
+        utils.clear_console()
+
+        self.__display_menu()
+
+        if self.__is_playing:
+            self.__display_evaluation()
+
+    def __display_evaluation(self):
         eval_type = self.__engine.get_evaluation()['type']
         value = self.__engine.get_evaluation()['value']
 
         if eval_type == 'cp':
             value = value / 100
 
-        utils.clear_console()
-
         print(f'Evaluation - {eval_type}: {value}')
 
     def __init_driver(self):
-        self.__options = Options()
-        self.__options.binary_location = self.__config.get('Path', 'chrome_binary')
-        self.__options.add_experimental_option("excludeSwitches", ['enable-automation'])
+        options = Options()
+        options.binary_location = self.__config.get('Path', 'chrome_binary')
+        options.add_experimental_option("excludeSwitches", ['enable-automation'])
+        options.add_argument('ignore-certificate-errors')
+        options.add_argument("--ignore-ssl-errors")
+        options.accept_insecure_certs = True
 
         self.__driver = webdriver.Chrome(executable_path=self.__config.get('Path', 'web_driver'),
-                                         options=self.__options)
+                                         options=options)
         self.__driver.maximize_window()
         self.__driver.get(self.__config.get('Path', 'url'))
 
@@ -126,8 +135,6 @@ class ChessBot:
 
     def __display_menu(self):
         title = 'Hotkeys\n'
-
-        utils.clear_console()
 
         print(title)
 

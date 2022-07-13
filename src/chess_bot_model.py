@@ -1,6 +1,5 @@
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
-import inspect
 
 from parser import Parser
 import utils
@@ -17,8 +16,6 @@ class ChessBotModel:
         self.__next_move = None
 
     def display_next_move(self):
-        func_name = inspect.currentframe().f_code.co_name
-
         if not self.__next_move:
             self.__next_move = self.__get_next_move()
 
@@ -36,31 +33,21 @@ class ChessBotModel:
                     if strings.display_hint_highlight_color == e.value_of_css_property('background-color'):
                         return
 
-        x, y = self.__compute_offsets()
-
-        utils.log(self.__config.getboolean('Misc', 'debug'), f'Move: ({x}, {y})', func_name)
-
         ac = ActionChains(self.__driver)
-        utils.context_click_on_element(self.__next_move['element'], ac)
-        utils.context_click_on_element_offset(self.__next_move['element'], ac, x, y)
+        utils.right_click_on_square(ac, self.__board.get_board_element(), self.__next_move['element'][0])
+        utils.right_click_on_square(ac, self.__board.get_board_element(), self.__next_move['element'][1])
         ac.perform()
 
     def play_next_move(self):
-        func_name = inspect.currentframe().f_code.co_name
-
         if not self.__next_move:
             self.__next_move = self.__get_next_move()
 
             if not self.__next_move:
                 return
 
-        x, y = self.__compute_offsets()
-
-        utils.log(self.__config.getboolean('Misc', 'debug'), f'Move: ({x}, {y})', func_name)
-
         ac = ActionChains(self.__driver)
-        utils.click_on_element(self.__next_move['element'], ac)
-        utils.click_on_element_offset(self.__next_move['element'], ac, x, y)
+        utils.click_on_square(ac, self.__board.get_board_element(), self.__next_move['square'][0])
+        utils.click_on_square(ac, self.__board.get_board_element(), self.__next_move['square'][1])
         ac.perform()
 
         if self.__next_move['promotion'][0]:
@@ -71,7 +58,7 @@ class ChessBotModel:
                     piece_name = piece.get_attribute('class')[-2]
 
                     if piece_name == self.__next_move['promotion'][1]:
-                        utils.click_on_element(piece, ac)
+                        utils.click_on_element(ac, piece)
                         ac.perform()
                         break
 
@@ -79,20 +66,6 @@ class ChessBotModel:
 
     def reset(self):
         self.__next_move = None
-
-    def __compute_offsets(self):
-        if not self.__next_move:
-            return None, None
-
-        src_x, src_y = self.__board.get_board_element(self.__next_move['squares'][0])['x'], \
-                       self.__board.get_board_element(self.__next_move['squares'][0])['y']
-        dest_x, dest_y = self.__board.get_board_element(self.__next_move['squares'][1])['x'], \
-                         self.__board.get_board_element(self.__next_move['squares'][1])['y']
-
-        x = dest_x - src_x
-        y = dest_y - src_y
-
-        return x, y
 
     def __get_next_move(self):
         self.__next_move = None
@@ -105,10 +78,11 @@ class ChessBotModel:
 
             res = Parser.parse_move_from_engine(move, self.__board)
 
-            src_square, dest_square = res['squares'][0][0], res['squares'][0][1]
-            src_element = self.__board.get_board_element(res['squares'][0][0])['element']
+            src_square_name, dest_square_name = res['squares'][0][0], res['squares'][0][1]
+            src_square, dest_square = self.__board.get_board_map_element(src_square_name), \
+                                      self.__board.get_board_map_element(dest_square_name)
 
-            self.__next_move = {'squares': (src_square, dest_square), 'element': src_element,
+            self.__next_move = {'square': (src_square, dest_square),
                                 'promotion': res['promotion']}
 
         return self.__next_move

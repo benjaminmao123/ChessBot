@@ -14,20 +14,35 @@ def log(is_debug, message, func_name=''):
         print(f'[{func_name}] {message}')
 
 
-def click_on_element(element, ac):
+def click_on_element(ac, element):
     ac.move_to_element(element)
     ac.click()
 
 
-def click_on_element_offset(element, ac, x=0, y=0):
-    ac.move_to_element_with_offset(element, x, y)
+def click_on_square(ac, board_element, src_square):
+    square_size = board_element.size['height'] / 8
+
+    board_location_x = -board_element.location['x'] - square_size
+    board_location_y = -square_size * 4
+
+    distance_x = src_square['x'] - board_element.location['x']
+    distance_y = src_square['y'] - board_element.location['y']
+
+    x = board_location_x + distance_x
+    y = board_location_y + distance_y
+
+    ac.move_to_element_with_offset(board_element, x, y)
     ac.click()
 
 
-def context_click_on_element(element, ac):
-    ac.context_click(element)
+def right_click_on_square(ac, board_element, src_square):
+    square_height = board_element.size['height'] / 8
 
+    board_location_x = -board_element.location['x']
+    board_location_y = -square_height * 4
 
-def context_click_on_element_offset(element, ac, x=0, y=0):
-    ac.move_to_element_with_offset(element, x, y)
+    x = board_location_x + (src_square['x'] - board_element.location['x'])
+    y = board_location_y + src_square['y']
+
+    ac.move_to_element_with_offset(board_element, x, y)
     ac.context_click()

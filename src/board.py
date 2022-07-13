@@ -64,6 +64,10 @@ class Board:
         if not h_elements:
             return
 
+        for e in h_elements:
+            if 'element-pool' in e.get_attribute('class'):
+                return
+
         last_move = self.__driver.find_elements(By.CSS_SELECTOR, strings.node_selected)
 
         if last_move == self.__prev_move:

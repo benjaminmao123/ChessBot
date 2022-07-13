@@ -52,9 +52,6 @@ class Parser:
         for e in h_elements:
             name = e.get_attribute('class')
 
-            if 'element_pool' in name:
-                continue
-
             if dest_square_num not in name:
                 break
 

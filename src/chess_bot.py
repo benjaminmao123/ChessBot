@@ -46,33 +46,16 @@ class ChessBot:
             if self.__driver.find_elements(By.CSS_SELECTOR, strings.resign_button):
                 self.__is_playing = True
 
-            if self.__driver.current_url:
-                if 'analysis' in self.__driver.current_url:
-                    if not self.__board.board_in_checkmate():
-                        self.__is_playing = True
-
             if self.__is_playing:
-                self.__update_gui()
+                self.update_gui()
                 utils.log(self.__config.getboolean('Misc', 'debug'),
                           f'Is Playing: {self.__is_playing}', func_name)
         else:
-            if self.__driver.find_elements(By.CSS_SELECTOR, strings.game_over) or \
-                    self.__driver.find_elements(By.XPATH, strings.game_over_text) or \
-                    self.__driver.find_elements(By.CSS_SELECTOR, strings.game_result):
+            if self.__driver.find_elements(By.CSS_SELECTOR, strings.game_result):
                 self.__is_playing = False
 
-            if self.__driver.current_url:
-                if ('analysis' not in self.__driver.current_url and
-                        'game' not in self.__driver.current_url and
-                        'computer' not in self.__driver.current_url):
-                    self.__is_playing = False
-
-                if 'analysis' in self.__driver.current_url:
-                    if self.__board.board_in_checkmate():
-                        self.__is_playing = False
-
             if not self.__is_playing:
-                self.__update_gui()
+                self.update_gui()
                 utils.log(self.__config.getboolean('Misc', 'debug'),
                           f'Is Playing: {self.__is_playing}', func_name)
 
@@ -90,16 +73,15 @@ class ChessBot:
 
         if eval_type == 'cp':
             value = value / 100
+        if eval_type == 'mate':
+            value = value - 1 if value > 0 else value + 1
 
-        print(f'Evaluation - {eval_type}: {value}')
+        print(f'Evaluation - {eval_type}: {value}\n')
 
     def __init_driver(self):
         options = Options()
         options.binary_location = self.__config.get('Path', 'chrome_binary')
         options.add_experimental_option("excludeSwitches", ['enable-automation'])
-        options.add_argument('ignore-certificate-errors')
-        options.add_argument("--ignore-ssl-errors")
-        options.accept_insecure_certs = True
 
         self.__driver = webdriver.Chrome(executable_path=self.__config.get('Path', 'web_driver'),
                                          options=options)
@@ -109,7 +91,9 @@ class ChessBot:
     def __update(self, board_initialized):
         self.update_state()
 
-        self.__input_handler.poll_toggle_autoplay_input()
+        if self.__input_handler.poll_toggle_autoplay_input():
+            self.update_gui()
+
         quit_app = self.__input_handler.poll_quit_input()
 
         if self.__is_playing:
@@ -139,4 +123,9 @@ class ChessBot:
         print(title)
 
         for k, v in self.__config['Keybinds'].items():
-            print(f'{k}: {v}')
+            if k == 'toggle_autoplay':
+                print(f'{k}: {v} [{self.__config.getboolean("Misc", "autoplay")}]')
+            else:
+                print(f'{k}: {v}')
+
+        print()

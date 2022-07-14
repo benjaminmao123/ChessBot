@@ -100,7 +100,7 @@ class Parser:
             dest_square = san[2:]
         else:
             if board.is_flipped():
-                promo_piece_name = Parser.fen_to_name_black[san[-1]]
+                promo_piece_name = Parser.fen_to_name_black_promo[san[-1]]
             else:
                 promo_piece_name = Parser.fen_to_name_white[san[-1].upper()]
 

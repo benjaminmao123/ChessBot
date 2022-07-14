@@ -1,5 +1,6 @@
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
+import inspect
 
 from parser import Parser
 import utils
@@ -35,20 +36,26 @@ class ChessBotModel:
                         return
 
         ac = ActionChains(self.__driver)
-        utils.right_click_on_square(ac, self.__board.get_board_element(), self.__next_move['square'][0])
-        utils.right_click_on_square(ac, self.__board.get_board_element(), self.__next_move['square'][1])
+        ac.w3c_actions.pointer_action._duration = 0
+        utils.right_click_on_square(ac, self.__board, self.__next_move['square'][0])
+        utils.right_click_on_square(ac, self.__board, self.__next_move['square'][1])
         ac.perform()
 
     def play_next_move(self):
+        func_name = inspect.currentframe().f_code.co_name
+
         if not self.__next_move:
             self.__next_move = self.__get_next_move()
 
             if not self.__next_move:
                 return
 
+        utils.log(self.__config.getboolean('Misc', 'debug'), f'Player Move: {self.__next_move}', func_name)
+
         ac = ActionChains(self.__driver)
-        utils.click_on_square(ac, self.__board.get_board_element(), self.__next_move['square'][0])
-        utils.click_on_square(ac, self.__board.get_board_element(), self.__next_move['square'][1])
+        ac.w3c_actions.pointer_action._duration = 0
+        utils.click_on_square(ac, self.__board, self.__next_move['square'][0])
+        utils.click_on_square(ac, self.__board, self.__next_move['square'][1])
         ac.perform()
 
         if self.__next_move['promotion'][0]:
@@ -56,7 +63,7 @@ class ChessBotModel:
 
             if promo_pieces:
                 for piece in promo_pieces:
-                    piece_name = piece.get_attribute('class')[-2]
+                    piece_name = piece.get_attribute('class')[-2:]
 
                     if piece_name == self.__next_move['promotion'][1]:
                         utils.click_on_element(ac, piece)

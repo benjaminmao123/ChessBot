@@ -1,5 +1,3 @@
-game_over = '.live-game-buttons-game-over'
-game_over_text = "//*[text()[contains(.,'Game Over')]]"
 game_result = '.game-result'
 resign_button = '.flag'
 

@@ -91,17 +91,21 @@ class Board:
             return
 
         try:
+            move = Parser.parse_move_from_site(last_move, h_elements, self.get_turn())
+        except KeyError:
+            return
+
+        try:
             self.__push_move(last_move)
         except ValueError:
             return
 
-        last_move = Parser.parse_move_from_site(last_move, h_elements, self.get_turn())
-        self.__overwrite_elements(last_move)
+        self.__overwrite_elements(move)
 
         self.__turn = not self.__turn
 
         self.__chess_bot.update_state()
-        self.__chess_bot.self.update_gui()
+        self.__chess_bot.update_gui()
 
     def generate_fen(self):
         return self.__board.fen()
@@ -150,14 +154,14 @@ class Board:
         return self.__is_board_in_checkmate
 
     def reset_board(self):
-        self.__board.reset()
+        self.__board = chess.Board()
         self.__board_mapping = {}
         self.__turn = True
         self.__prev_move = None
         self.__overwrite_element_queue.clear()
         self.__is_board_in_checkmate = False
         self.__board_element = None
-        self.__square_size['width'], self.__square_size['y'] = 0, 0
+        self.__square_size['width'], self.__square_size['height'] = 0, 0
 
     def get_board_element(self):
         return self.__board_element
